@@ -75,6 +75,8 @@ public class KeychainImplementation: Keychain {
         }
         return updated
       }
+    } catch KeychainQueryError.notFound {
+      throw KeychainError.notFound(message: "Couldn't get data for record: \(record)")
     } catch let error as KeychainQueryError {
       throw KeychainError.general(message: "Couldn't get data for record: \(record). Status: \(error.status)")
     } catch {
