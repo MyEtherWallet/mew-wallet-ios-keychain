@@ -38,7 +38,7 @@ public struct KeychainKeypair {
 }
 
 public enum KeychainRecord {
-  case data(data: Data?, label: String?, account: String?)
+  case data(data: DataConvertible?, label: String?, account: String?)
   case key(key: SecKey?, label: String?)
   
   public var label: String? {
@@ -70,7 +70,14 @@ public enum KeychainRecord {
     guard case let .data(data, _, _) = self else {
       return nil
     }
-    return data
+    return data?._data
+  }
+  
+  public func value<T>() -> T? {
+    guard case let .data(data, _, _) = self else {
+      return nil
+    }
+    return (data as? ValueConvertible)?._value()
   }
   
   public func withUpdated(data: Data) -> KeychainRecord? {

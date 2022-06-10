@@ -30,22 +30,24 @@ class testAppTests: XCTestCase {
   }
   
   override func setUp() {
-    try? testAppTests.keychain.delete(.key(key: nil, label: "key"))
-    try? testAppTests.keychain.delete(.key(key: nil, label: "pub"))
-    try? testAppTests.keychain.delete(.key(key: nil, label: "key-change"))
-    try? testAppTests.keychain.delete(.key(key: nil, label: "pub-change"))
-    try? testAppTests.keychain.delete(.data(data: nil, label: "message", account: nil))
-    try? testAppTests.keychain.delete(.data(data: nil, label: "message-change", account: nil))
+    _clear()
   }
   
   override func tearDown() {
+    _clear()
+  }
+  
+  private func _clear() {
     try? testAppTests.keychain.delete(.key(key: nil, label: "key"))
     try? testAppTests.keychain.delete(.key(key: nil, label: "pub"))
     try? testAppTests.keychain.delete(.key(key: nil, label: "key-change"))
     try? testAppTests.keychain.delete(.key(key: nil, label: "pub-change"))
     try? testAppTests.keychain.delete(.data(data: nil, label: "message", account: nil))
+    try? testAppTests.keychain.delete(.data(data: nil, label: "bool", account: nil))
     try? testAppTests.keychain.delete(.data(data: nil, label: "message-change", account: nil))
   }
+  
+  // MARK: - Tests
   
   func testBadKeychainShouldThrowError() {
     let credential = Data([0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
@@ -275,21 +277,40 @@ class testAppTests: XCTestCase {
     }
   }
   
+  func testSaveAndLoadBool() {
+    do {
+      let value = true
+      try testAppTests.keychain.delete(.data(data: value, label: "bool", account: nil))
+      defer {
+        try? testAppTests.keychain.delete(.data(data: value, label: "bool", account: nil))
+      }
+      try testAppTests.keychain.save(.data(data: value, label: "bool", account: nil))
+      
+      guard let loadedBool: Bool = try testAppTests.keychain.load(.data(data: nil, label: "bool", account: nil), context: nil).value() else {
+        XCTFail("item not found")
+        return
+      }
+      XCTAssertEqual(value, loadedBool)
+    } catch {
+      XCTFail(error.localizedDescription)
+    }
+  }
+  
   func testSaveAndLoadItem() {
     do {
       let text = "This is test message"
       let data = text.data(using: .utf8)!
-      try testAppTests.keychain.delete(.data(data: nil, label: "message", account: nil))
+      try testAppTests.keychain.delete(.data(data: text, label: "message", account: nil))
       defer {
-        try? testAppTests.keychain.delete(.data(data: nil, label: "message", account: nil))
+        try? testAppTests.keychain.delete(.data(data: text, label: "message", account: nil))
       }
-      try testAppTests.keychain.save(.data(data: data, label: "message", account: nil))
+      try testAppTests.keychain.save(.data(data: text, label: "message", account: nil))
       
-      guard let loaded = try testAppTests.keychain.load(.data(data: nil, label: "message", account: nil), context: nil).data else {
+      guard let loaded = try testAppTests.keychain.load(.data(data: nil, label: "message", account: nil), context: nil).data,
+            let loadedText: String = try testAppTests.keychain.load(.data(data: nil, label: "message", account: nil), context: nil).value() else {
         XCTFail("item not found")
         return
       }
-      let loadedText = String(data: loaded, encoding: .utf8)
       XCTAssertEqual(data, loaded)
       XCTAssertEqual(text, loadedText)
     } catch {

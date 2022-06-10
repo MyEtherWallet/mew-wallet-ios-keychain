@@ -57,7 +57,7 @@ enum KeychainQueryError: Error {
   }
 }
 
-class KeychainQuery<R> {
+final class KeychainQuery<R> {
   let raw: [String: Any]
   let operation: KeychainQueryOperation
   

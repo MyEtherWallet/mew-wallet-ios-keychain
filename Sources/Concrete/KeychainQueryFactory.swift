@@ -9,11 +9,12 @@
 import Foundation
 import LocalAuthentication
 
-class KeychainQueryFactory {
+final class KeychainQueryFactory {
   static func save(_ record: KeychainRecord, accessGroup: String?) throws -> KeychainQuery<Void> {
     switch record {
-    case let .data(data, label, account) where data != nil:
-      return .add(item: data!, label: label, account: account, accessGroup: accessGroup)
+    case let .data(data, label, account):
+      guard let data = data?._data else { throw KeychainError.general(message: "Empty data") }
+      return .add(item: data, label: label, account: account, accessGroup: accessGroup)
     case let .key(key, label) where key != nil:
       return .add(key: key!, label: label, accessGroup: accessGroup)
     default:
@@ -23,8 +24,9 @@ class KeychainQueryFactory {
   
   static func update(_ record: KeychainRecord, accessGroup: String?) throws -> KeychainQuery<Void> {
     switch record {
-    case let .data(data, label, account) where data != nil:
-      return .update(item: data!, label: label, account: account, accessGroup: accessGroup)
+    case let .data(data, label, account):
+      guard let data = data?._data else { throw KeychainError.general(message: "Empty data") }
+      return .update(item: data, label: label, account: account, accessGroup: accessGroup)
     case let .key(key, label) where key != nil:
       return .update(key: key!, label: label, accessGroup: accessGroup)
     default:

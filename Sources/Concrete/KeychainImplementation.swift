@@ -9,7 +9,7 @@
 import Foundation
 import LocalAuthentication
 
-public class KeychainImplementation: Keychain {
+public final class KeychainImplementation: Keychain {
   public let accessGroup: String?
   
   public init(accessGroup: String?) {
