@@ -10,9 +10,9 @@ import Foundation
 import LocalAuthentication
 
 public final class KeychainImplementation: Keychain {
-  public let accessGroup: String?
+  public let accessGroup: Keychain.AccessGroup?
   
-  public init(accessGroup: String?) {
+  public init(accessGroup: Keychain.AccessGroup?) {
     self.accessGroup = accessGroup
   }
   
@@ -222,8 +222,8 @@ public final class KeychainImplementation: Keychain {
 
     // Generate temporary keypair
     var tempKeys = KeychainKeypair(prv: "\(keys.prv.label ?? "<unset>")-change",
-                                    pub: "\(keys.pub.label ?? "<unset>")-change",
-                                    secureEnclave: true)
+                                   pub: "\(keys.pub.label ?? "<unset>")-change",
+                                   secureEnclave: true)
     try? self.delete(tempKeys.prv)
     try? self.delete(tempKeys.pub)
     tempKeys = try self.generate(keys: tempKeys, context: newContext)

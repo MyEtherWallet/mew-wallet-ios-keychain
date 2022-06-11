@@ -11,6 +11,18 @@ import LocalAuthentication
 @testable import testApp
 @testable import mew_wallet_ios_keychain
 
+private extension KeychainRecord.Label {
+  static let key            = KeychainRecord.Label("key")
+  static let prv            = KeychainRecord.Label("prv")
+  static let pub            = KeychainRecord.Label("pub")
+  static let keyChange      = KeychainRecord.Label("key-change")
+  static let pubChange      = KeychainRecord.Label("pub-change")
+  static let message        = KeychainRecord.Label("message")
+  static let bool           = KeychainRecord.Label("bool")
+  static let messageChange  = KeychainRecord.Label("message-change")
+  static let label          = KeychainRecord.Label("label")
+}
+
 class testAppTests: XCTestCase {
   static var keychain: Keychain!
   static var badkeychain: Keychain!
@@ -38,13 +50,13 @@ class testAppTests: XCTestCase {
   }
   
   private func _clear() {
-    try? testAppTests.keychain.delete(.key(key: nil, label: "key"))
-    try? testAppTests.keychain.delete(.key(key: nil, label: "pub"))
-    try? testAppTests.keychain.delete(.key(key: nil, label: "key-change"))
-    try? testAppTests.keychain.delete(.key(key: nil, label: "pub-change"))
-    try? testAppTests.keychain.delete(.data(data: nil, label: "message", account: nil))
-    try? testAppTests.keychain.delete(.data(data: nil, label: "bool", account: nil))
-    try? testAppTests.keychain.delete(.data(data: nil, label: "message-change", account: nil))
+    try? testAppTests.keychain.delete(.key(key: nil, label: .key))
+    try? testAppTests.keychain.delete(.key(key: nil, label: .pub))
+    try? testAppTests.keychain.delete(.key(key: nil, label: .keyChange))
+    try? testAppTests.keychain.delete(.key(key: nil, label: .pubChange))
+    try? testAppTests.keychain.delete(.data(data: nil, label: .message, account: nil))
+    try? testAppTests.keychain.delete(.data(data: nil, label: .bool, account: nil))
+    try? testAppTests.keychain.delete(.data(data: nil, label: .messageChange, account: nil))
   }
   
   // MARK: - Tests
@@ -54,23 +66,23 @@ class testAppTests: XCTestCase {
     let laContext = LAContext()
     laContext.setCredential(credential, type: .applicationPassword)
     
-    XCTAssertThrowsError(try testAppTests.badkeychain.save(.data(data: Data(), label: "label", account: nil)))
-    XCTAssertThrowsError(try testAppTests.badkeychain.update(.data(data: Data(), label: "label", account: nil)))
-    XCTAssertThrowsError(try testAppTests.badkeychain.load(.data(data: Data(), label: "label", account: nil), context: nil))
-    XCTAssertThrowsError(try testAppTests.badkeychain.delete(.data(data: Data(), label: "label", account: nil)))
-    XCTAssertThrowsError(try testAppTests.badkeychain.generate(keys: KeychainKeypair(prv: "prv", pub: "pub"), context: laContext))
+    XCTAssertThrowsError(try testAppTests.badkeychain.save(.data(data: Data(), label: .label, account: nil)))
+    XCTAssertThrowsError(try testAppTests.badkeychain.update(.data(data: Data(), label: .label, account: nil)))
+    XCTAssertThrowsError(try testAppTests.badkeychain.load(.data(data: Data(), label: .label, account: nil), context: nil))
+    XCTAssertThrowsError(try testAppTests.badkeychain.delete(.data(data: Data(), label: .label, account: nil)))
+    XCTAssertThrowsError(try testAppTests.badkeychain.generate(keys: KeychainKeypair(prv: .prv, pub: .pub), context: laContext))
     XCTAssertThrowsError(try testAppTests.badkeychain.verifySecureEnclave(context: laContext))
-    XCTAssertThrowsError(try testAppTests.badkeychain.encrypt(pub: .key(key: nil, label: "pub"), digest: .data(data: Data(), label: nil, account: nil), context: laContext))
-    XCTAssertThrowsError(try testAppTests.badkeychain.decrypt(prv: .key(key: nil, label: "prv"), encrypted: .data(data: Data(), label: nil, account: nil), context: laContext))
-    XCTAssertThrowsError(try testAppTests.badkeychain.encryptAndSave(pub: .key(key: nil, label: "pub"), item: .data(data: Data(), label: nil, account: nil), context: laContext))
-    XCTAssertThrowsError(try testAppTests.badkeychain.loadAndDecrypt(prv: .key(key: nil, label: "prv"), item: .data(data: Data(), label: nil, account: nil), context: laContext))
-    XCTAssertThrowsError(try testAppTests.badkeychain.change(keys: KeychainKeypair(prv: "prv", pub: "pub"), item: .data(data: Data(), label: nil, account: nil), oldContext: laContext, newContext: laContext))
+    XCTAssertThrowsError(try testAppTests.badkeychain.encrypt(pub: .key(key: nil, label: .pub), digest: .data(data: Data(), label: nil, account: nil), context: laContext))
+    XCTAssertThrowsError(try testAppTests.badkeychain.decrypt(prv: .key(key: nil, label: .prv), encrypted: .data(data: Data(), label: nil, account: nil), context: laContext))
+    XCTAssertThrowsError(try testAppTests.badkeychain.encryptAndSave(pub: .key(key: nil, label: .pub), item: .data(data: Data(), label: nil, account: nil), context: laContext))
+    XCTAssertThrowsError(try testAppTests.badkeychain.loadAndDecrypt(prv: .key(key: nil, label: .prv), item: .data(data: Data(), label: nil, account: nil), context: laContext))
+    XCTAssertThrowsError(try testAppTests.badkeychain.change(keys: KeychainKeypair(prv: .prv, pub: .pub), item: .data(data: Data(), label: nil, account: nil), oldContext: laContext, newContext: laContext))
   }
 
   func testSaveKey() {
     do {
-      try testAppTests.keychain.save(.key(key: testAppTests.key, label: "key"))
-      let key = try testAppTests.keychain.load(.key(key: nil, label: "key"), context: nil).key
+      try testAppTests.keychain.save(.key(key: testAppTests.key, label: .key))
+      let key = try testAppTests.keychain.load(.key(key: nil, label: .key), context: nil).key
       XCTAssertEqual(testAppTests.key, key)
     } catch {
       XCTFail(error.localizedDescription)
@@ -78,8 +90,8 @@ class testAppTests: XCTestCase {
   }
   
   func testDoubleSaveKey() {
-    XCTAssertNoThrow(try testAppTests.keychain.save(.key(key: testAppTests.key, label: "key")))
-    XCTAssertThrowsError(try testAppTests.keychain.save(.key(key: testAppTests.key, label: "key")))
+    XCTAssertNoThrow(try testAppTests.keychain.save(.key(key: testAppTests.key, label: .key)))
+    XCTAssertThrowsError(try testAppTests.keychain.save(.key(key: testAppTests.key, label: .key)))
   }
   
   func testUpdateShouldSave() {
@@ -87,8 +99,8 @@ class testAppTests: XCTestCase {
       let text = "This is test data"
       let data = text.data(using: .utf8)!
       
-      try testAppTests.keychain.update(.data(data: data, label: "message", account: nil))
-      let loaded = try testAppTests.keychain.load(.data(data: nil, label: "message", account: nil), context: nil)
+      try testAppTests.keychain.update(.data(data: data, label: .message, account: nil))
+      let loaded = try testAppTests.keychain.load(.data(data: nil, label: .message, account: nil), context: nil)
       let loadedText = String(data: loaded.data!, encoding: .utf8)
       
       XCTAssertEqual(data, loaded.data)
@@ -105,15 +117,15 @@ class testAppTests: XCTestCase {
       let data = text.data(using: .utf8)!
       let updatedData = updated.data(using: .utf8)!
       
-      try testAppTests.keychain.update(.data(data: data, label: "message", account: nil))
-      let loaded = try testAppTests.keychain.load(.data(data: nil, label: "message", account: nil), context: nil)
+      try testAppTests.keychain.update(.data(data: data, label: .message, account: nil))
+      let loaded = try testAppTests.keychain.load(.data(data: nil, label: .message, account: nil), context: nil)
       let loadedText = String(data: loaded.data!, encoding: .utf8)
       
       XCTAssertEqual(data, loaded.data)
       XCTAssertEqual(text, loadedText)
       
-      try testAppTests.keychain.update(.data(data: updatedData, label: "message", account: nil))
-      let loadedUpdate = try testAppTests.keychain.load(.data(data: nil, label: "message", account: nil), context: nil)
+      try testAppTests.keychain.update(.data(data: updatedData, label: .message, account: nil))
+      let loadedUpdate = try testAppTests.keychain.load(.data(data: nil, label: .message, account: nil), context: nil)
       let loadedTextUpdate = String(data: loadedUpdate.data!, encoding: .utf8)
       
       XCTAssertEqual(updatedData, loadedUpdate.data)
@@ -124,19 +136,19 @@ class testAppTests: XCTestCase {
   }
   
   func testUpdateShouldNotUpdateNorSaveKey() {
-    XCTAssertThrowsError(try testAppTests.keychain.update(.key(key: testAppTests.key, label: "key")))
+    XCTAssertThrowsError(try testAppTests.keychain.update(.key(key: testAppTests.key, label: .key)))
   }
   
   func testReset() {
     do {
-      try testAppTests.keychain.save(.key(key: testAppTests.key, label: "key"))
-      XCTAssertNoThrow(try testAppTests.keychain.load(.key(key: nil, label: "key"), context: nil))
+      try testAppTests.keychain.save(.key(key: testAppTests.key, label: .key))
+      XCTAssertNoThrow(try testAppTests.keychain.load(.key(key: nil, label: .key), context: nil))
       
       let text = "This is test data"
       let data = text.data(using: .utf8)!
       
-      try testAppTests.keychain.update(.data(data: data, label: "message", account: nil))
-      let loaded = try testAppTests.keychain.load(.data(data: nil, label: "message", account: nil), context: nil)
+      try testAppTests.keychain.update(.data(data: data, label: .message, account: nil))
+      let loaded = try testAppTests.keychain.load(.data(data: nil, label: .message, account: nil), context: nil)
       let loadedText = String(data: loaded.data!, encoding: .utf8)
       
       XCTAssertEqual(data, loaded.data)
@@ -144,8 +156,8 @@ class testAppTests: XCTestCase {
       
       testAppTests.keychain.reset()
       
-      XCTAssertThrowsError(try testAppTests.keychain.load(.key(key: nil, label: "key"), context: nil))
-      XCTAssertThrowsError(try testAppTests.keychain.load(.data(data: nil, label: "message", account: nil), context: nil))
+      XCTAssertThrowsError(try testAppTests.keychain.load(.key(key: nil, label: .key), context: nil))
+      XCTAssertThrowsError(try testAppTests.keychain.load(.data(data: nil, label: .message, account: nil), context: nil))
     } catch {
       XCTFail(error.localizedDescription)
     }
@@ -153,10 +165,10 @@ class testAppTests: XCTestCase {
   
   func testDeleteKey() {
     do {
-      try testAppTests.keychain.save(.key(key: testAppTests.key, label: "key"))
-      XCTAssertNoThrow(try testAppTests.keychain.load(.key(key: nil, label: "key"), context: nil))
-      try testAppTests.keychain.delete(.key(key: nil, label: "key"))
-      XCTAssertThrowsError(try testAppTests.keychain.load(.key(key: nil, label: "key"), context: nil))
+      try testAppTests.keychain.save(.key(key: testAppTests.key, label: .key))
+      XCTAssertNoThrow(try testAppTests.keychain.load(.key(key: nil, label: .key), context: nil))
+      try testAppTests.keychain.delete(.key(key: nil, label: .key))
+      XCTAssertThrowsError(try testAppTests.keychain.load(.key(key: nil, label: .key), context: nil))
     } catch {
       XCTFail(error.localizedDescription)
     }
@@ -167,7 +179,7 @@ class testAppTests: XCTestCase {
     let laContext = LAContext()
     laContext.setCredential(credential, type: .applicationPassword)
     do {
-      let keys = try testAppTests.keychain.generate(keys: KeychainKeypair(prv: "key", pub: "pub", secureEnclave: true), context: laContext)
+      let keys = try testAppTests.keychain.generate(keys: KeychainKeypair(prv: .key, pub: .pub, secureEnclave: true), context: laContext)
       XCTAssertNotNil(keys.prv)
       XCTAssertNotNil(keys.pub)
     } catch {
@@ -180,9 +192,9 @@ class testAppTests: XCTestCase {
     let laContext = LAContext()
     laContext.setCredential(credential, type: .applicationPassword)
     do {
-      let keys = try testAppTests.keychain.generate(keys: KeychainKeypair(prv: "key", pub: "pub", secureEnclave: true), context: laContext)
-      try testAppTests.keychain.delete(.key(key: nil, label: "key"))
-      try testAppTests.keychain.delete(.key(key: nil, label: "pub"))
+      let keys = try testAppTests.keychain.generate(keys: KeychainKeypair(prv: .key, pub: .pub, secureEnclave: true), context: laContext)
+      try testAppTests.keychain.delete(.key(key: nil, label: .key))
+      try testAppTests.keychain.delete(.key(key: nil, label: .pub))
       try testAppTests.keychain.save(keys.pub)
     } catch {
       XCTFail(error.localizedDescription)
@@ -194,9 +206,9 @@ class testAppTests: XCTestCase {
     let laContext = LAContext()
     laContext.setCredential(credential, type: .applicationPassword)
     do {
-      try testAppTests.keychain.delete(.key(key: nil, label: "key"))
-      let keys = try testAppTests.keychain.generate(keys: KeychainKeypair(prv: "key", pub: "pub", secureEnclave: true), context: laContext)
-      let load = try testAppTests.keychain.load(.key(key: nil, label: "key"), context: nil).key
+      try testAppTests.keychain.delete(.key(key: nil, label: .key))
+      let keys = try testAppTests.keychain.generate(keys: KeychainKeypair(prv: .key, pub: .pub, secureEnclave: true), context: laContext)
+      let load = try testAppTests.keychain.load(.key(key: nil, label: .key), context: nil).key
       XCTAssertThrowsError(try testAppTests.keychain.save(keys.pub))
       XCTAssertEqual(load, keys.prv.key)
       XCTAssertNotNil(load)
@@ -209,19 +221,19 @@ class testAppTests: XCTestCase {
     let credential = Data([0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
     let laContext = LAContext()
     do {
-      try testAppTests.keychain.delete(.key(key: nil, label: "key"))
-      try testAppTests.keychain.delete(.key(key: nil, label: "pub"))
+      try testAppTests.keychain.delete(.key(key: nil, label: .key))
+      try testAppTests.keychain.delete(.key(key: nil, label: .pub))
       
       laContext.setCredential(credential, type: .applicationPassword)
-      _ = try testAppTests.keychain.generate(keys: KeychainKeypair(prv: "key", pub: "pub", secureEnclave: true), context: laContext)
+      _ = try testAppTests.keychain.generate(keys: KeychainKeypair(prv: .key, pub: .pub, secureEnclave: true), context: laContext)
       
       let text = "This is test data"
       let data = text.data(using: .utf8)!
-      let encrypted = try testAppTests.keychain.encrypt(pub: .key(key: nil, label: "pub"),
+      let encrypted = try testAppTests.keychain.encrypt(pub: .key(key: nil, label: .pub),
                                                         digest: .data(data: data, label: nil, account: nil),
                                                         context: laContext)
       
-      let decrypted = try testAppTests.keychain.decrypt(prv: .key(key: nil, label: "key"),
+      let decrypted = try testAppTests.keychain.decrypt(prv: .key(key: nil, label: .key),
                                                         encrypted: encrypted,
                                                           context: laContext)
       guard let decryptedData = decrypted.data else {
@@ -233,8 +245,8 @@ class testAppTests: XCTestCase {
       XCTAssertEqual(data, decryptedData)
       XCTAssertEqual(decryptedText, text)
 
-      try testAppTests.keychain.delete(.key(key: nil, label: "key"))
-      try testAppTests.keychain.delete(.key(key: nil, label: "pub"))
+      try testAppTests.keychain.delete(.key(key: nil, label: .key))
+      try testAppTests.keychain.delete(.key(key: nil, label: .pub))
     } catch {
       XCTFail(error.localizedDescription)
     }
@@ -244,11 +256,11 @@ class testAppTests: XCTestCase {
     let credential = Data([0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
     let laContext = LAContext()
     laContext.setCredential(credential, type: .applicationPassword)
-    XCTAssertNoThrow(try testAppTests.keychain.generate(keys: KeychainKeypair(prv: "key", pub: "pub", secureEnclave: true), context: laContext))
-    XCTAssertThrowsError(try testAppTests.keychain.generate(keys: KeychainKeypair(prv: "key", pub: "pub", secureEnclave: true), context: laContext))
+    XCTAssertNoThrow(try testAppTests.keychain.generate(keys: KeychainKeypair(prv: .key, pub: .pub, secureEnclave: true), context: laContext))
+    XCTAssertThrowsError(try testAppTests.keychain.generate(keys: KeychainKeypair(prv: .key, pub: .pub, secureEnclave: true), context: laContext))
     
     do {
-      try testAppTests.keychain.delete(.key(key: nil, label: "key"))
+      try testAppTests.keychain.delete(.key(key: nil, label: .key))
     } catch {
       XCTFail(error.localizedDescription)
     }
@@ -265,13 +277,13 @@ class testAppTests: XCTestCase {
     do {
       let text = "This is test message"
       let data = text.data(using: .utf8)!
-      try testAppTests.keychain.delete(.data(data: nil, label: "message", account: nil))
+      try testAppTests.keychain.delete(.data(data: nil, label: .message, account: nil))
       defer {
-        try? testAppTests.keychain.delete(.data(data: nil, label: "message", account: nil))
+        try? testAppTests.keychain.delete(.data(data: nil, label: .message, account: nil))
       }
       
-      XCTAssertNoThrow(try testAppTests.keychain.save(.data(data: data, label: "message", account: nil)))
-      XCTAssertThrowsError(try testAppTests.keychain.save(.data(data: data, label: "message", account: nil)))
+      XCTAssertNoThrow(try testAppTests.keychain.save(.data(data: data, label: .message, account: nil)))
+      XCTAssertThrowsError(try testAppTests.keychain.save(.data(data: data, label: .message, account: nil)))
     } catch {
       XCTFail(error.localizedDescription)
     }
@@ -280,13 +292,13 @@ class testAppTests: XCTestCase {
   func testSaveAndLoadBool() {
     do {
       let value = true
-      try testAppTests.keychain.delete(.data(data: value, label: "bool", account: nil))
+      try testAppTests.keychain.delete(.data(data: value, label: .bool, account: nil))
       defer {
-        try? testAppTests.keychain.delete(.data(data: value, label: "bool", account: nil))
+        try? testAppTests.keychain.delete(.data(data: value, label: .bool, account: nil))
       }
-      try testAppTests.keychain.save(.data(data: value, label: "bool", account: nil))
+      try testAppTests.keychain.save(.data(data: value, label: .bool, account: nil))
       
-      guard let loadedBool: Bool = try testAppTests.keychain.load(.data(data: nil, label: "bool", account: nil), context: nil).value() else {
+      guard let loadedBool: Bool = try testAppTests.keychain.load(.data(data: nil, label: .bool, account: nil), context: nil).value() else {
         XCTFail("item not found")
         return
       }
@@ -300,14 +312,14 @@ class testAppTests: XCTestCase {
     do {
       let text = "This is test message"
       let data = text.data(using: .utf8)!
-      try testAppTests.keychain.delete(.data(data: text, label: "message", account: nil))
+      try testAppTests.keychain.delete(.data(data: text, label: .message, account: nil))
       defer {
-        try? testAppTests.keychain.delete(.data(data: text, label: "message", account: nil))
+        try? testAppTests.keychain.delete(.data(data: text, label: .message, account: nil))
       }
-      try testAppTests.keychain.save(.data(data: text, label: "message", account: nil))
+      try testAppTests.keychain.save(.data(data: text, label: .message, account: nil))
       
-      guard let loaded = try testAppTests.keychain.load(.data(data: nil, label: "message", account: nil), context: nil).data,
-            let loadedText: String = try testAppTests.keychain.load(.data(data: nil, label: "message", account: nil), context: nil).value() else {
+      guard let loaded = try testAppTests.keychain.load(.data(data: nil, label: .message, account: nil), context: nil).data,
+            let loadedText: String = try testAppTests.keychain.load(.data(data: nil, label: .message, account: nil), context: nil).value() else {
         XCTFail("item not found")
         return
       }
@@ -324,25 +336,25 @@ class testAppTests: XCTestCase {
     laContext.setCredential(credential, type: .applicationPassword)
     
     do {
-      try testAppTests.keychain.delete(.key(key: nil, label: "key"))
-      try testAppTests.keychain.delete(.key(key: nil, label: "pub"))
+      try testAppTests.keychain.delete(.key(key: nil, label: .key))
+      try testAppTests.keychain.delete(.key(key: nil, label: .pub))
       
       laContext.setCredential(credential, type: .applicationPassword)
-      _ = try testAppTests.keychain.generate(keys: KeychainKeypair(prv: "key", pub: "pub", secureEnclave: true), context: laContext)
+      _ = try testAppTests.keychain.generate(keys: KeychainKeypair(prv: .key, pub: .pub, secureEnclave: true), context: laContext)
       
       let text = "This is test message"
       let data = text.data(using: .utf8)!
       
-      try testAppTests.keychain.encryptAndSave(pub: .key(key: nil, label: "pub"),
-                                               item: .data(data: data, label: "message", account: nil),
+      try testAppTests.keychain.encryptAndSave(pub: .key(key: nil, label: .pub),
+                                               item: .data(data: data, label: .message, account: nil),
                                                context: laContext)
       
-      let encrypted = try testAppTests.keychain.load(.data(data: nil, label: "message", account: nil), context: nil).data
+      let encrypted = try testAppTests.keychain.load(.data(data: nil, label: .message, account: nil), context: nil).data
       
       XCTAssertNotEqual(data, encrypted)
       
-      let decrypted = try testAppTests.keychain.loadAndDecrypt(prv: .key(key: nil, label: "key"),
-                                                               item: .data(data: nil, label: "message", account: nil),
+      let decrypted = try testAppTests.keychain.loadAndDecrypt(prv: .key(key: nil, label: .key),
+                                                               item: .data(data: nil, label: .message, account: nil),
                                                                context: laContext)
       guard let decryptedData = decrypted.data else {
         XCTFail("Empty data")
@@ -365,26 +377,26 @@ class testAppTests: XCTestCase {
     do {
       
       laContext.setCredential(credential, type: .applicationPassword)
-      _ = try testAppTests.keychain.generate(keys: KeychainKeypair(prv: "key", pub: "pub", secureEnclave: true), context: laContext)
+      _ = try testAppTests.keychain.generate(keys: KeychainKeypair(prv: .key, pub: .pub, secureEnclave: true), context: laContext)
       
       let text = "This is test message"
       let data = text.data(using: .utf8)!
       
-      try testAppTests.keychain.encryptAndSave(pub: .key(key: nil, label: "pub"),
-                                               item: .data(data: data, label: "message", account: nil),
+      try testAppTests.keychain.encryptAndSave(pub: .key(key: nil, label: .pub),
+                                               item: .data(data: data, label: .message, account: nil),
                                                context: laContext)
       
-      let encrypted = try testAppTests.keychain.load(.data(data: nil, label: "message", account: nil), context: nil).data
+      let encrypted = try testAppTests.keychain.load(.data(data: nil, label: .message, account: nil), context: nil).data
       
       XCTAssertNotEqual(data, encrypted)
       
-      try testAppTests.keychain.delete(.key(key: nil, label: "key"))
-      try testAppTests.keychain.delete(.key(key: nil, label: "pub"))
+      try testAppTests.keychain.delete(.key(key: nil, label: .key))
+      try testAppTests.keychain.delete(.key(key: nil, label: .pub))
       
-      _ = try testAppTests.keychain.generate(keys: KeychainKeypair(prv: "key", pub: "pub", secureEnclave: true), context: laContext)
+      _ = try testAppTests.keychain.generate(keys: KeychainKeypair(prv: .key, pub: .pub, secureEnclave: true), context: laContext)
       
-      XCTAssertThrowsError(try testAppTests.keychain.loadAndDecrypt(prv: .key(key: nil, label: "key"),
-                                                                    item: .data(data: nil, label: "message",
+      XCTAssertThrowsError(try testAppTests.keychain.loadAndDecrypt(prv: .key(key: nil, label: .key),
+                                                                    item: .data(data: nil, label: .message,
                                                                                 account: nil),
                                                                     context: laContext))
     } catch {
@@ -402,22 +414,22 @@ class testAppTests: XCTestCase {
     newLaContext.setCredential(newCredential, type: .applicationPassword)
     
     do {
-      _ = try testAppTests.keychain.generate(keys: KeychainKeypair(prv: "key", pub: "pub", secureEnclave: true), context: laContext)
+      _ = try testAppTests.keychain.generate(keys: KeychainKeypair(prv: .key, pub: .pub, secureEnclave: true), context: laContext)
       
       let text = "This is test message"
       let data = text.data(using: .utf8)!
       
-      try testAppTests.keychain.encryptAndSave(pub: .key(key: nil, label: "pub"),
-                                               item: .data(data: data, label: "message", account: nil),
+      try testAppTests.keychain.encryptAndSave(pub: .key(key: nil, label: .pub),
+                                               item: .data(data: data, label: .message, account: nil),
                                                context: laContext)
       
-      try testAppTests.keychain.change(keys: KeychainKeypair(prv: "key", pub: "pub", secureEnclave: true),
-                                       item: .data(data: nil, label: "message", account: nil),
+      try testAppTests.keychain.change(keys: KeychainKeypair(prv: .key, pub: .pub, secureEnclave: true),
+                                       item: .data(data: nil, label: .message, account: nil),
                                        oldContext: laContext,
                                        newContext: newLaContext)
       
-      let decrypted = try testAppTests.keychain.loadAndDecrypt(prv: .key(key: nil, label: "key"),
-                                                               item: .data(data: nil, label: "message", account: nil),
+      let decrypted = try testAppTests.keychain.loadAndDecrypt(prv: .key(key: nil, label: .key),
+                                                               item: .data(data: nil, label: .message, account: nil),
                                                                context: newLaContext)
       guard let decryptedData = decrypted.data else {
         XCTFail("Empty data")
@@ -428,8 +440,8 @@ class testAppTests: XCTestCase {
       XCTAssertEqual(data, decryptedData)
       XCTAssertEqual(text, decryptedText)
       
-      XCTAssertThrowsError(try testAppTests.keychain.loadAndDecrypt(prv: .key(key: nil, label: "key"),
-                                                                    item: .data(data: nil, label: "message", account: nil),
+      XCTAssertThrowsError(try testAppTests.keychain.loadAndDecrypt(prv: .key(key: nil, label: .key),
+                                                                    item: .data(data: nil, label: .message, account: nil),
                                                                     context: laContext))
     } catch {
       XCTFail(error.localizedDescription)
@@ -446,31 +458,31 @@ class testAppTests: XCTestCase {
     newLaContext.setCredential(newCredential, type: .applicationPassword)
     
     do {
-      _ = try testAppTests.keychain.generate(keys: KeychainKeypair(prv: "key", pub: "pub", secureEnclave: true), context: laContext)
+      _ = try testAppTests.keychain.generate(keys: KeychainKeypair(prv: .key, pub: .pub, secureEnclave: true), context: laContext)
       
       let text = "This is test message"
       let data = text.data(using: .utf8)!
       
-      try testAppTests.keychain.encryptAndSave(pub: .key(key: nil, label: "pub"),
-                                               item: .data(data: data, label: "message", account: nil),
+      try testAppTests.keychain.encryptAndSave(pub: .key(key: nil, label: .pub),
+                                               item: .data(data: data, label: .message, account: nil),
                                                context: laContext)
       
-      let decrypted = try testAppTests.keychain.loadAndDecrypt(prv: .key(key: nil, label: "key"),
-                                                               item: .data(data: data, label: "message", account: nil),
+      let decrypted = try testAppTests.keychain.loadAndDecrypt(prv: .key(key: nil, label: .key),
+                                                               item: .data(data: data, label: .message, account: nil),
                                                                context: laContext)
       
-      try testAppTests.keychain.delete(.key(key: nil, label: "key"))
-      try testAppTests.keychain.delete(.key(key: nil, label: "pub"))
-      try testAppTests.keychain.delete(.data(data: nil, label: "message", account: nil))
+      try testAppTests.keychain.delete(.key(key: nil, label: .key))
+      try testAppTests.keychain.delete(.key(key: nil, label: .pub))
+      try testAppTests.keychain.delete(.data(data: nil, label: .message, account: nil))
       
-      _ = try testAppTests.keychain.generate(keys: KeychainKeypair(prv: "key", pub: "pub", secureEnclave: true), context: newLaContext)
+      _ = try testAppTests.keychain.generate(keys: KeychainKeypair(prv: .key, pub: .pub, secureEnclave: true), context: newLaContext)
       
-      try testAppTests.keychain.encryptAndSave(pub: .key(key: nil, label: "pub"),
-                                               item: .data(data: data, label: "message", account: nil),
+      try testAppTests.keychain.encryptAndSave(pub: .key(key: nil, label: .pub),
+                                               item: .data(data: data, label: .message, account: nil),
                                                context: newLaContext)
       
-      let decrypted2 = try testAppTests.keychain.loadAndDecrypt(prv: .key(key: nil, label: "key"),
-                                                                item: .data(data: nil, label: "message", account: nil),
+      let decrypted2 = try testAppTests.keychain.loadAndDecrypt(prv: .key(key: nil, label: .key),
+                                                                item: .data(data: nil, label: .message, account: nil),
                                                                 context: newLaContext)
       
       guard let decryptedData = decrypted.data, let decryptedData2 = decrypted2.data else {
@@ -487,8 +499,8 @@ class testAppTests: XCTestCase {
       XCTAssertEqual(decryptedData, decryptedData2)
       XCTAssertEqual(decryptedText, decryptedText2)
       
-      XCTAssertThrowsError(try testAppTests.keychain.loadAndDecrypt(prv: .key(key: nil, label: "key"),
-                                                                    item: .data(data: nil, label: "message", account: nil),
+      XCTAssertThrowsError(try testAppTests.keychain.loadAndDecrypt(prv: .key(key: nil, label: .key),
+                                                                    item: .data(data: nil, label: .message, account: nil),
                                                                     context: laContext))
     } catch {
       XCTFail(error.localizedDescription)

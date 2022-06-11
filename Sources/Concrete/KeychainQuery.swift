@@ -68,7 +68,7 @@ final class KeychainQuery<R> {
   
   // MARK: - Add
   
-  static func add(key: SecKey, label: String?, accessGroup: String?) -> KeychainQuery<R> {
+  static func add(key: SecKey, label: KeychainRecord.Label?, accessGroup: Keychain.AccessGroup?) -> KeychainQuery<R> {
     var query: [String: Any] = [
       kSecClass               as String: kSecClassKey,
       kSecValueRef            as String: key,
@@ -85,7 +85,7 @@ final class KeychainQuery<R> {
     return KeychainQuery(raw: query, operation: .add)
   }
   
-  static func add(item: Data, label: String?, account: String?, accessGroup: String?) -> KeychainQuery<R> {
+  static func add(item: Data, label: KeychainRecord.Label?, account: KeychainRecord.Account?, accessGroup: Keychain.AccessGroup?) -> KeychainQuery<R> {
     var query: [String: Any] = [
       kSecClass               as String: kSecClassGenericPassword,
       kSecValueData           as String: item,
@@ -107,7 +107,7 @@ final class KeychainQuery<R> {
   
   // MARK: - Add
   
-  static func update(key: SecKey, label: String?, accessGroup: String?) -> KeychainQuery<R> {
+  static func update(key: SecKey, label: KeychainRecord.Label?, accessGroup: Keychain.AccessGroup?) -> KeychainQuery<R> {
     var query: [String: Any] = [
       kSecClass               as String: kSecClassKey,
       kSecAttrSynchronizable  as String: false
@@ -122,7 +122,7 @@ final class KeychainQuery<R> {
     return KeychainQuery(raw: query, operation: .update([kSecValueRef as String: key]))
   }
   
-  static func update(item: Data, label: String?, account: String?, accessGroup: String?) -> KeychainQuery<R> {
+  static func update(item: Data, label: KeychainRecord.Label?, account: KeychainRecord.Account?, accessGroup: Keychain.AccessGroup?) -> KeychainQuery<R> {
     var query: [String: Any] = [
       kSecClass               as String: kSecClassGenericPassword,
       kSecAttrSynchronizable  as String: false
@@ -142,7 +142,7 @@ final class KeychainQuery<R> {
   
   // MARK: - Delete
   
-  static func delete(key label: String?, accessGroup: String?) -> KeychainQuery<R> {
+  static func delete(key label: KeychainRecord.Label?, accessGroup: Keychain.AccessGroup?) -> KeychainQuery<R> {
     var query: [String: Any] = [
       kSecClass               as String: kSecClassKey,
       kSecAttrSynchronizable  as String: false
@@ -158,7 +158,7 @@ final class KeychainQuery<R> {
     return KeychainQuery(raw: query, operation: .delete)
   }
   
-  static func delete(item label: String?, account: String?, accessGroup: String?) -> KeychainQuery<R> {
+  static func delete(item label: KeychainRecord.Label?, account: KeychainRecord.Account?, accessGroup: Keychain.AccessGroup?) -> KeychainQuery<R> {
     var query: [String: Any] = [
       kSecClass               as String: kSecClassGenericPassword,
       kSecAttrSynchronizable  as String: false
@@ -177,7 +177,7 @@ final class KeychainQuery<R> {
     return KeychainQuery(raw: query, operation: .delete)
   }
   
-  static func deleteAll(keys: Bool, accessGroup: String?) -> KeychainQuery<R> {
+  static func deleteAll(keys: Bool, accessGroup: Keychain.AccessGroup?) -> KeychainQuery<R> {
     var query: [String: Any] = [
       kSecAttrSynchronizable as String: false
     ]
@@ -196,7 +196,7 @@ final class KeychainQuery<R> {
   
   // MARK: - Load
   
-  static func load(key label: String?, accessGroup: String?, context: LAContext?) -> KeychainQuery<R> {
+  static func load(key label: KeychainRecord.Label?, accessGroup: Keychain.AccessGroup?, context: LAContext?) -> KeychainQuery<R> {
     var query: [String: Any] = [
       kSecClass               as String: kSecClassKey,
       kSecReturnRef           as String: true,
@@ -221,7 +221,7 @@ final class KeychainQuery<R> {
     return KeychainQuery(raw: query, operation: .load)
   }
   
-  static func load(item label: String?, account: String?, accessGroup: String?) -> KeychainQuery<R> {
+  static func load(item label: KeychainRecord.Label?, account: KeychainRecord.Account?, accessGroup: Keychain.AccessGroup?) -> KeychainQuery<R> {
     var query: [String: Any] = [
       kSecClass               as String: kSecClassGenericPassword,
       kSecReturnData          as String: true,
@@ -244,7 +244,7 @@ final class KeychainQuery<R> {
   
   // Generate
   
-  static func generate(prvLabel: String?, pubLabel: String?, accessGroup: String?, context: LAContext?, secureEnclave: Bool) throws -> KeychainQuery<R> {
+  static func generate(prvLabel: KeychainRecord.Label?, pubLabel: KeychainRecord.Label?, accessGroup: Keychain.AccessGroup?, context: LAContext?, secureEnclave: Bool) throws -> KeychainQuery<R> {
     /* ========= private ========= */
     var prvQuery: [String: Any] = [
       kSecAttrIsPermanent     as String: true,
@@ -300,7 +300,7 @@ final class KeychainQuery<R> {
   
   // MARK: - All
   
-  static func all(keys: Bool, accessGroup: String?) -> KeychainQuery<R> {
+  static func all(keys: Bool, accessGroup: Keychain.AccessGroup?) -> KeychainQuery<R> {
     var query: [String: Any] = [
       kSecReturnData          as String: false,
       kSecReturnAttributes    as String: true,
