@@ -27,7 +27,7 @@ public final class KeychainImplementation: Keychain {
     } catch KeychainQueryError.missingEntitlement {
       throw KeychainError.general(message: "Couldn't save record. Missing entitlement.")
     } catch KeychainQueryError.duplicateItem {
-      throw KeychainError.general(message: "Couldn't save record. Duplicate item.")
+      throw KeychainError.duplicateItem(message: "Couldn't save record. Duplicate item.")
     } catch let KeychainQueryError.other(status: status) {
       throw KeychainError.general(message: "Couldn't save record. OSStatus: \(status). Record: \(record)")
     }
@@ -38,22 +38,26 @@ public final class KeychainImplementation: Keychain {
       throw KeychainError.general(message: "Couldn't update record. Not supported.")
     }
     do {
-      try self.validateNotFound(record: record, context: nil)
+      // Try save first
       try self.save(record)
-      return
-    } catch {}
-    
-    let query = try KeychainQueryFactory.update(record, accessGroup: self.accessGroup)
-    do {
-      try query.execute().get()
-    } catch KeychainQueryError.invalidRecord {
-      throw KeychainError.general(message: "Couldn't update record. It's possible that the access control you have provided isn't supported on this OS and/or hardware.")
-    } catch KeychainQueryError.missingEntitlement {
-      throw KeychainError.general(message: "Couldn't update record. Missing entitlement.")
-    } catch KeychainQueryError.duplicateItem {
-      throw KeychainError.general(message: "Couldn't update record. Duplicate item.")
-    } catch let KeychainQueryError.other(status: status) {
-      throw KeychainError.general(message: "Couldn't update record. OSStatus: \(status). Record: \(record)")
+    } catch KeychainError.duplicateItem {
+      // Override record
+      let query = try KeychainQueryFactory.update(record, accessGroup: self.accessGroup)
+      do {
+        try query.execute().get()
+      } catch KeychainQueryError.invalidRecord {
+        throw KeychainError.general(message: "Couldn't update record. It's possible that the access control you have provided isn't supported on this OS and/or hardware.")
+      } catch KeychainQueryError.missingEntitlement {
+        throw KeychainError.general(message: "Couldn't update record. Missing entitlement.")
+      } catch KeychainQueryError.duplicateItem {
+        throw KeychainError.duplicateItem(message: "Couldn't update record. Duplicate item.")
+      } catch let KeychainQueryError.other(status: status) {
+        throw KeychainError.general(message: "Couldn't update record. OSStatus: \(status). Record: \(record)")
+      } catch KeychainQueryError.notFound {
+        throw KeychainError.notFound(message: "Couldn't get data for record: \(record)")
+      } catch {
+        throw error
+      }
     }
   }
   
@@ -295,9 +299,9 @@ public final class KeychainImplementation: Keychain {
       _ = try loadQuery.execute().get()
       switch record {
       case let .data(_, label, account):
-        throw KeychainError.general(message: "Duplicate item. Label: \(label ?? "<emtpy>"). Account: \(account ?? "<empty>")")
+        throw KeychainError.duplicateItem(message: "Duplicate item. Label: \(label ?? "<emtpy>"). Account: \(account ?? "<empty>")")
       case let .key(_, label: label):
-        throw KeychainError.general(message: "Duplicate key. Label: \(label ?? "<empty>")")
+        throw KeychainError.duplicateItem(message: "Duplicate key. Label: \(label ?? "<empty>")")
       }
     } catch KeychainQueryError.notFound {
     } catch {

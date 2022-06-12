@@ -15,6 +15,7 @@ public enum KeychainError: LocalizedError {
   case authentication(error: LAError)
   case general(message: String)
   case notFound(message: String)
+  case duplicateItem(message: String)
   case invalid
 
   public var errorDescription: String? {
@@ -29,6 +30,8 @@ public enum KeychainError: LocalizedError {
       return "General error: \(message)"
     case let .notFound(message):
       return "Not found: \(message)"
+    case let .duplicateItem(message):
+      return "Duplicate item: \(message)"
     case .invalid:
       return "Invalid"
     }
