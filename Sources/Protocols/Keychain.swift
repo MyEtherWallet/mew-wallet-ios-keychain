@@ -10,7 +10,8 @@ import Foundation
 import LocalAuthentication
 
 public protocol Keychain {
-  var accessGroup: String? { get }
+  typealias AccessGroup = String
+  var accessGroup: AccessGroup? { get }
   // MARK: - Keys
   func save(_ record: KeychainRecord) throws
   func update(_ record: KeychainRecord) throws
